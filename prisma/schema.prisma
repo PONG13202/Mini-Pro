@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  user
+  admin
+}
+
+model User {
+  Id            Int        @id @default(autoincrement())
+  Status        UserStatus @default(user)
+  User_Name     String     @unique
+  First_Name    String
+  Last_Name     String?
+  Email         String?
+  Password      String?
+  Profile_Image String?
+  Reviews       Review[]
+  contents      Content[]  @relation("UserContents") 
+}
+model Content {
+  id         Int       @id @default(autoincrement())
+  text       String
+  createdAt  DateTime  @default(now())
+  userId     Int
+  user       User      @relation("UserContents", fields: [userId], references: [Id])  // Match relation name here
+  pictures   Picture[] @relation("ContentPictures")  // Picture relation
+}
+model Review {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [Id])
+  comment    String  
+  image      String?  
+  createdAt  DateTime @default(now())
+}
+model Picture {
+  id         Int       @id @default(autoincrement())
+  createdAt  DateTime  @default(now())
+  contentId  Int       // Foreign key to Content
+  content    Content   @relation("ContentPictures", fields: [contentId], references: [id])
+}
